@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Responses - LLM Observability{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        <h1>Responses</h1>
+        <span class="count">{{ "{:,}".format(total) }} total</span>
+    </div>
+
+    <div class="filters">
+        <form method="get" class="filter-form">
+            <select name="model" class="filter-select" onchange="this.form.submit()">
+                <option value="">All Models</option>
+                {% for m in models %}
+                <option value="{{ m }}" {% if selected_model == m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    {% if responses %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Model</th>
+                <th>Prompt</th>
+                <th class="text-right">Tokens</th>
+                <th class="text-right">Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for response in responses %}
+            <tr>
+                <td class="nowrap">
+                    <a href="/responses/{{ response.id }}">
+                        {{ response.datetime_utc[:16] if response.datetime_utc else 'N/A' }}
+                    </a>
+                </td>
+                <td><code>{{ response.model }}</code></td>
+                <td class="truncate">{{ (response.prompt or '')[:80] }}{% if response.prompt and response.prompt|length > 80 %}...{% endif %}</td>
+                <td class="text-right nowrap">
+                    {% if response.input_tokens or response.output_tokens %}
+                    {{ response.input_tokens or 0 }} / {{ response.output_tokens or 0 }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td class="text-right nowrap">
+                    {% if response.duration_ms %}
+                    {{ "{:,}".format(response.duration_ms) }}ms
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if total_pages > 1 %}
+    <nav class="pagination">
+        {% if page > 1 %}
+        <a href="?page={{ page - 1 }}{% if selected_model %}&model={{ selected_model }}{% endif %}" class="page-link">&laquo; Previous</a>
+        {% endif %}
+
+        <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+
+        {% if page < total_pages %}
+        <a href="?page={{ page + 1 }}{% if selected_model %}&model={{ selected_model }}{% endif %}" class="page-link">Next &raquo;</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+    <p class="empty-state">No responses found</p>
+    {% endif %}
+</div>
+{% endblock %}

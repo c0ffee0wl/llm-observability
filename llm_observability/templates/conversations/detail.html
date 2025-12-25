@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Conversation {{ conversation.name or conversation.id[:8] }} - LLM Observability{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        <h1>{{ conversation.name or 'Conversation' }}</h1>
+        <a href="/conversations" class="back-link">&larr; Back to conversations</a>
+    </div>
+
+    <div class="detail-header">
+        <div class="detail-meta">
+            <span class="meta-item">
+                <strong>ID:</strong> <code>{{ conversation.id }}</code>
+            </span>
+            {% if conversation.model %}
+            <span class="meta-item">
+                <strong>Model:</strong> <code>{{ conversation.model }}</code>
+            </span>
+            {% endif %}
+            <span class="meta-item">
+                <strong>Responses:</strong> {{ responses|length }}
+            </span>
+            <span class="meta-item">
+                <strong>Total Tokens:</strong> {{ "{:,}".format(total_input_tokens) }} in / {{ "{:,}".format(total_output_tokens) }} out
+            </span>
+            <span class="meta-item">
+                <strong>Total Duration:</strong> {{ "{:,}".format(total_duration_ms) }}ms
+            </span>
+        </div>
+    </div>
+
+    <section class="detail-section">
+        <h2>Conversation Thread</h2>
+
+        {% if responses %}
+        <div class="conversation-thread">
+            {% for response in responses %}
+            <div class="conversation-message">
+                <div class="message-header">
+                    <span class="message-time">{{ response.datetime_utc[:16] if response.datetime_utc else 'N/A' }}</span>
+                    <code class="message-model">{{ response.model }}</code>
+                    {% if response.duration_ms %}
+                    <span class="message-duration">{{ "{:,}".format(response.duration_ms) }}ms</span>
+                    {% endif %}
+                    <a href="/responses/{{ response.id }}" class="message-link">View details &rarr;</a>
+                </div>
+
+                <div class="message-content">
+                    <div class="message-prompt">
+                        <strong>Prompt:</strong>
+                        <pre>{{ (response.prompt or '')[:500] }}{% if response.prompt and response.prompt|length > 500 %}...{% endif %}</pre>
+                    </div>
+                    <div class="message-response">
+                        <strong>Response:</strong>
+                        <pre>{{ (response.response or '')[:500] }}{% if response.response and response.response|length > 500 %}...{% endif %}</pre>
+                    </div>
+                </div>
+
+                {% if response.input_tokens or response.output_tokens %}
+                <div class="message-footer">
+                    <span class="token-usage">
+                        {{ response.input_tokens or 0 }} in / {{ response.output_tokens or 0 }} out tokens
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-state">No responses in this conversation</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

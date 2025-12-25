@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Response {{ response.id[:8] }} - LLM Observability{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        <h1>Response Details</h1>
+        <a href="/responses" class="back-link">&larr; Back to responses</a>
+    </div>
+
+    <div class="detail-header">
+        <div class="detail-meta">
+            <span class="meta-item">
+                <strong>ID:</strong> <code>{{ response.id }}</code>
+            </span>
+            <span class="meta-item">
+                <strong>Model:</strong> <code>{{ response.model }}</code>
+            </span>
+            <span class="meta-item">
+                <strong>Time:</strong> {{ response.datetime_utc or 'N/A' }}
+            </span>
+            {% if response.duration_ms %}
+            <span class="meta-item">
+                <strong>Duration:</strong> {{ "{:,}".format(response.duration_ms) }}ms
+            </span>
+            {% endif %}
+            {% if response.input_tokens or response.output_tokens %}
+            <span class="meta-item">
+                <strong>Tokens:</strong> {{ response.input_tokens or 0 }} in / {{ response.output_tokens or 0 }} out
+            </span>
+            {% endif %}
+            {% if conversation %}
+            <span class="meta-item">
+                <strong>Conversation:</strong>
+                <a href="/conversations/{{ conversation.id }}">{{ conversation.name or conversation.id[:8] }}</a>
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if response.system %}
+    <section class="detail-section">
+        <h2>System Prompt</h2>
+        <pre class="code-block">{{ response.system }}</pre>
+    </section>
+    {% endif %}
+
+    <section class="detail-section">
+        <h2>Prompt</h2>
+        <pre class="code-block">{{ response.prompt or '(empty)' }}</pre>
+    </section>
+
+    <section class="detail-section">
+        <h2>Response</h2>
+        <pre class="code-block">{{ response.response or '(empty)' }}</pre>
+    </section>
+
+    {% if tool_calls %}
+    <section class="detail-section">
+        <h2>Tool Calls</h2>
+        <div class="tool-list">
+            {% for tc in tool_calls %}
+            <div class="tool-item">
+                <div class="tool-header">
+                    <strong>{{ tc.name }}</strong>
+                    {% if tc.tool_call_id %}
+                    <code class="tool-id">{{ tc.tool_call_id }}</code>
+                    {% endif %}
+                </div>
+                {% if tc.arguments %}
+                <pre class="code-block tool-args">{{ tc.arguments }}</pre>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if tool_results %}
+    <section class="detail-section">
+        <h2>Tool Results</h2>
+        <div class="tool-list">
+            {% for tr in tool_results %}
+            <div class="tool-item {% if tr.exception %}error{% endif %}">
+                <div class="tool-header">
+                    <strong>{{ tr.name }}</strong>
+                    {% if tr.tool_call_id %}
+                    <code class="tool-id">{{ tr.tool_call_id }}</code>
+                    {% endif %}
+                    {% if tr.exception %}
+                    <span class="badge error">Error</span>
+                    {% endif %}
+                </div>
+                {% if tr.exception %}
+                <pre class="code-block error">{{ tr.exception }}</pre>
+                {% elif tr.output %}
+                <pre class="code-block">{{ tr.output }}</pre>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if attachments %}
+    <section class="detail-section">
+        <h2>Attachments</h2>
+        <div class="attachment-list">
+            {% for att in attachments %}
+            <div class="attachment-item">
+                <span class="attachment-type">{{ att.type or 'unknown' }}</span>
+                {% if att.path %}
+                <span class="attachment-path">{{ att.path }}</span>
+                {% elif att.url %}
+                <a href="{{ att.url }}" class="attachment-url" target="_blank">{{ att.url[:50] }}{% if att.url|length > 50 %}...{% endif %}</a>
+                {% else %}
+                <span class="attachment-id">{{ att.id[:16] }}...</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Conversations - LLM Observability{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="page-header">
+        <h1>Conversations</h1>
+        <span class="count">{{ "{:,}".format(total) }} total</span>
+    </div>
+
+    {% if conversations %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Conversation</th>
+                <th>Model</th>
+                <th class="text-right">Responses</th>
+                <th class="text-right">Tokens</th>
+                <th>Last Activity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for conv in conversations %}
+            <tr>
+                <td>
+                    <a href="/conversations/{{ conv.id }}">
+                        {{ conv.name or conv.id[:12] }}
+                    </a>
+                </td>
+                <td><code>{{ conv.model or 'N/A' }}</code></td>
+                <td class="text-right">{{ conv.response_count }}</td>
+                <td class="text-right nowrap">
+                    {{ "{:,}".format(conv.total_input_tokens + conv.total_output_tokens) }}
+                </td>
+                <td class="nowrap">
+                    {{ conv.last_response[:16] if conv.last_response else 'N/A' }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if total_pages > 1 %}
+    <nav class="pagination">
+        {% if page > 1 %}
+        <a href="?page={{ page - 1 }}" class="page-link">&laquo; Previous</a>
+        {% endif %}
+
+        <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+
+        {% if page < total_pages %}
+        <a href="?page={{ page + 1 }}" class="page-link">Next &raquo;</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+    <p class="empty-state">No conversations found</p>
+    {% endif %}
+</div>
+{% endblock %}

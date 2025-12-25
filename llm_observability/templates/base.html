@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LLM Observability{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">LLM Observability</a>
+            <nav class="nav">
+                <a href="/" class="nav-link{% if request.url.path == '/' %} active{% endif %}">Dashboard</a>
+                <a href="/responses" class="nav-link{% if '/responses' in request.url.path %} active{% endif %}">Responses</a>
+                <a href="/conversations" class="nav-link{% if '/conversations' in request.url.path %} active{% endif %}">Conversations</a>
+                <a href="/search" class="nav-link{% if '/search' in request.url.path %} active{% endif %}">Search</a>
+            </nav>
+            <form action="/search" method="get" class="search-form">
+                <input type="text" name="q" placeholder="Search prompts..." class="search-input" value="{{ query|default('', true) }}">
+            </form>
+        </div>
+    </header>
+
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>LLM Observability &middot; Viewing data from llm database</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
