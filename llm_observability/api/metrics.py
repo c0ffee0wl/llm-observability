@@ -1,6 +1,6 @@
 """API endpoints for metrics and analytics."""
 
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, Query, Request
 from pydantic import BaseModel

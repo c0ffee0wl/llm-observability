@@ -36,3 +36,8 @@ include = ["llm_observability*"]
 
 [tool.setuptools.package-data]
 llm_observability = ["templates/**/*", "static/**/*"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.10",
+]

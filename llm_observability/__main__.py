@@ -48,7 +48,7 @@ def main(db_path: str, host: str, port: int, reload: bool):
     except DatabaseError as e:
         raise click.ClickException(str(e))
 
-    click.echo(f"Starting LLM Observability server...")
+    click.echo("Starting LLM Observability server...")
     click.echo(f"Database: {db_path}")
     click.echo(f"Server:   http://{host}:{port}")
 
